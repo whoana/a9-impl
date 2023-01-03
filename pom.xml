@@ -1,0 +1,222 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>apple.mint</groupId>
+	<artifactId>a9-impl</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0</version>
+	<name>a9-impl</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<com.ibm.mq-version>7.5</com.ibm.mq-version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>codelds</id>
+			<url>https://code.lds.org/nexus/content/groups/main-repo</url>
+		</repository>
+		<repository>
+			<id>ta-repository</id>
+			<url>http://idc.mocomsys.com:28081/nexus/content/groups/public/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>apple.mint</groupId>
+			<artifactId>a9-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- <dependency>
+			<groupId>org.jprocesses</groupId>
+		<artifactId>jProcessesCus</artifactId>
+			<version>1.0.0</version>
+		</dependency> -->
+
+		<dependency>
+			<groupId>org.jprocesses</groupId>
+			<artifactId>jProcesses</artifactId>
+			<version>1.6.5</version>
+		</dependency>
+
+		<!-- <dependency>
+			<groupId>com.profesorfalken</groupId>
+			<artifactId>WMI4Java</artifactId>
+		<version>1.6.1</version>
+			<scope>runtime</scope>
+		</dependency>  -->
+
+		<dependency>
+			<groupId>com.mocomsys</groupId>
+			<artifactId>ILinkAPI</artifactId>
+			<version>6.1-5.0-20201029</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms-api</artifactId>
+			<version>1.1-rev-1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+
+		<!-- wmq7.5 lib -->
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>wmq-mq</artifactId>
+			<version>${com.ibm.mq-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>wmq-headers</artifactId>
+			<version>${com.ibm.mq-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>wmq-commonservices</artifactId>
+			<version>${com.ibm.mq-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>wmq-jmqi</artifactId>
+			<version>${com.ibm.mq-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>wmq-pcf</artifactId>
+			<version>${com.ibm.mq-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ibm.mq</groupId>
+			<artifactId>wmq-connector</artifactId>
+			<version>${com.ibm.mq-version}</version>
+		</dependency>
+
+		<!--IBM AIX JVM   - OperatingSystemMXBean  -->
+		<dependency>
+			<groupId>com.ibm.lang.management</groupId>
+			<artifactId>jlm</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--
+			https://mvnrepository.com/artifact/com.github.oshi/oshi-core
+			lib url:
+		https://github.com/oshi/oshi
+		-->
+		<dependency>
+			<groupId>com.github.oshi</groupId>
+			<artifactId>oshi-core</artifactId>
+			<version>5.3.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.java.dev.jna</groupId>
+					<artifactId>jna</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.dev.jna</groupId>
+					<artifactId>jna-platform</artifactId>
+				</exclusion>
+			</exclusions>
+			<!-- <version>3.13.6</version> -->
+		</dependency>
+
+		<!--INI  parser  -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.8.0</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>pep.per</groupId>
+			<artifactId>mint-common</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+
+		<!--
+		//implementation group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3'
+		//implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version:'2.11.2'
+		//implementation group: 'org.slf4j', name: 'jul-to-slf4j', version:'1.7.25' 
+		-->
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+
+
+	</dependencies>
+
+
+	<build>
+
+		<plugins>
+			<!-- dependency 들을 모두 포함하기위한 -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+
+					<!-- 이건 그냥 jar의 메인 클래스 지정하는것입니다. -->
+					<!-- 그냥 올려봤습니다... -->
+
+					<!-- <archive>
+						<manifest>
+							<mainClass>패키지를 포함한 클래스 전체이름</mainClass>
+					</manifest>
+					</archive> -->
+
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- 자바 버전을 1.8로 / 문자셋을 utf-8로 고정하기 위한 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+</project>
