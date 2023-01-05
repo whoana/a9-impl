@@ -81,6 +81,7 @@ public class WS0030Service extends PushService {
                     ext.setMsgType(Extension.MSG_TYPE_PUSH);
                     ext.setServiceCd(ServiceCodeConstant.WS0030);
                     msg.setExtension(ext);
+
                     return msg;
                 } catch (Throwable e) {
                     throw new Exception(e);

@@ -5,12 +5,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
 
-import apple.mint.agent.impl.service.push.HelloWorld;
 import pep.per.mint.agent.util.CommonVariables;
-//import pep.per.mint.agent.util.SystemResourceUtil;
+
 import pep.per.mint.agent.util.SystemResourceUtilBy3Party;
 import pep.per.mint.common.data.basic.agent.ProcessInfo;
 import pep.per.mint.common.data.basic.agent.ProcessStatusLog;

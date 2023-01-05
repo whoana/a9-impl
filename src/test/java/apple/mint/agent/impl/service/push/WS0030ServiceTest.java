@@ -17,7 +17,7 @@ import pep.per.mint.common.util.Util;
 
 public class WS0030ServiceTest {
     Logger logger = LoggerFactory.getLogger(this.getClass());
-    //@Test
+    @Test
     public void testMakePushMessage() throws Exception {
         
         ServiceContext context = new ServiceContext();
