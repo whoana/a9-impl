@@ -33,6 +33,7 @@
 			<groupId>apple.mint</groupId>
 			<artifactId>a9-core</artifactId>
 			<version>1.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- <dependency>
@@ -44,7 +45,7 @@
 		<dependency>
 			<groupId>org.jprocesses</groupId>
 			<artifactId>jProcesses</artifactId>
-			<version>1.6.5</version>
+			<version>1.6.4</version>
 		</dependency>
 
 		<!-- <dependency>
@@ -153,6 +154,7 @@
 			<groupId>pep.per</groupId>
 			<artifactId>mint-common</artifactId>
 			<version>3.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!--
