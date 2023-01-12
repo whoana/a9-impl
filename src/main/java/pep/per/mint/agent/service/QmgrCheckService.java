@@ -3,7 +3,7 @@ package pep.per.mint.agent.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+// import org.springframework.stereotype.Service;
 import pep.per.mint.agent.util.QmgrManager;
 import pep.per.mint.common.data.basic.agent.QmgrInfo;
 import pep.per.mint.common.data.basic.agent.QmgrLogs;
