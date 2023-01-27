@@ -14,6 +14,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<com.ibm.mq-version>7.5</com.ibm.mq-version>
+		<org.springframework-version>5.3.24</org.springframework-version>
 	</properties>
 
 	<repositories>
@@ -28,6 +29,13 @@
 	</repositories>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+      		<version>${org.springframework-version}</version>
+			<!-- <scope>test</scope> -->
+		</dependency>
 
 		<dependency>
 			<groupId>apple.mint</groupId>
@@ -153,6 +161,13 @@
 		<dependency>
 			<groupId>pep.per</groupId>
 			<artifactId>mint-common</artifactId>
+			<version>3.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>pep.per</groupId>
+			<artifactId>mint-agent-common</artifactId>
 			<version>3.0.0</version>
 			<scope>provided</scope>
 		</dependency>
