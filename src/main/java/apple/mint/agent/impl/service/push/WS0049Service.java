@@ -29,7 +29,16 @@ import pep.per.mint.common.data.basic.Extension;
 import pep.per.mint.common.data.basic.agent.IIPAgentInfo;
 import pep.per.mint.common.util.Util;
 
-
+/**
+ * <pre>
+ *  고용노동부(MOEL) 파일인터페이스 모니터링 서비스 
+ *  
+ *  
+ * </pre>
+ * @since 2023.01
+ * @author whoana
+ * 
+ */
 public class WS0049Service extends PushService {
 
     Logger logger = LoggerFactory.getLogger(WS0049Service.class);
@@ -124,21 +133,21 @@ public class WS0049Service extends PushService {
         String interfaceId = interfaze.get("interfaceId");
          
 
-        // 인터페이스ID (PK)
-        // 체크시작시간(초)
-        // 시간미초과파일건수
-        // 시간초과파일건수
-        // 에러파일건수
-        // 등록AGENT
-        // 등록일시
+        
+        
+        
+        
+        
+        
         Map<String, Object> log = new LinkedHashMap<>();         
-        log.put("interfaceId", interfaceId);
-        log.put("checkTime", Util.getFormatedDate());
-        log.put("fileCount", 0);
-        log.put("lazyFileCount" , 0);
-        log.put("errorFileCount" , 0);
-        log.put("regAgentId", agentId);
-        log.put("regDate", Util.getFormatedDate(Util.DEFAULT_DATE_FORMAT_MI));
+        
+        log.put("interfaceId", interfaceId);           // 인터페이스ID (PK)
+        log.put("checkTime", Util.getFormatedDate());  // 체크시작시간(초)
+        log.put("fileCount", 0);                // 시간미초과파일건수
+        log.put("lazyFileCount" , 0);           // 시간초과파일건수
+        log.put("errorFileCount" , 0);          // 에러파일건수
+        log.put("regAgentId", agentId);                // 등록AGENT
+        log.put("regDate", Util.getFormatedDate(Util.DEFAULT_DATE_FORMAT_MI));// 등록일시
      
         try (Stream<Path> stream = Files.walk(Paths.get(directory), 1);) {
             
@@ -149,8 +158,8 @@ public class WS0049Service extends PushService {
             int delayedFileCount = 0;
             for (Path file : list) {
                 FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
-                int elapsedSec = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000);
-                if (elapsedSec > fileTimeLimit) {
+                int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
+                if (elapsedMin > fileTimeLimit) {
                     delayedFileCount++;
                 } else {
                     fileCount++;
@@ -163,24 +172,20 @@ public class WS0049Service extends PushService {
  
         // 송신이면 에러 폴더도 추가 확인
         if (DIRECTION_SEND.equals(direction)) {
-
-            try (Stream<Path> stream = Files.walk(Paths.get(errorDirectory), 1);) {
-            
+            try (Stream<Path> stream = Files.walk(Paths.get(errorDirectory), 1);) {            
                 List<Path> list = Collections.emptyList();
                 list = stream.filter(Files::isRegularFile).collect(Collectors.toList());
                 
                 int errorFileCount = 0;
                 for (Path file : list) {
                     FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
-                    int elapsedSec = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000); 
-                    if (elapsedSec < errorFileDurationLimit) { // 에러파일의 보관주기 시간단위가 초가 아닐 경우 소스 수정 필요 .
+                    int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60); 
+                    if (elapsedMin < errorFileDurationLimit) { // 에러파일의 보관주기 시간단위가 초가 아닐 경우 소스 수정 필요 .
                         errorFileCount ++;
                     }  
-                }
-                
+                }                
                 log.put("errorFileCount", errorFileCount);                
             }
-
         }  
 
         logs.add(log);
