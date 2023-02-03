@@ -168,6 +168,8 @@ public class WS0049Service extends PushService {
             log.put("lazyFileCount" , delayedFileCount);             
             log.put("fileCount", fileCount);
             
+        }catch (IOException e) {
+            logger.error("", e);
         }
  
         // 송신이면 에러 폴더도 추가 확인
@@ -185,6 +187,8 @@ public class WS0049Service extends PushService {
                     }  
                 }                
                 log.put("errorFileCount", errorFileCount);                
+            }catch (IOException e) {
+                logger.error("", e);
             }
         }  
 
@@ -196,10 +200,10 @@ public class WS0049Service extends PushService {
     // https://velog.io/@dailylifecoding/Java-nio-package-Files-usage
     public static void main(String[] args) throws InterruptedException {
         Thread.sleep(1000);
-
+        String directory = "/Users/whoana/DEV/workspace-vs/a9-impl/home/interfaces/a.b2";
         long elapsed = System.currentTimeMillis();
         List<Path> list = Collections.emptyList();
-        try (Stream<Path> stream = Files.walk(Paths.get("/Users/whoana/DEV/workspace-vs/a9-impl/home/interfaces/a.b"),
+        try (Stream<Path> stream = Files.walk(Paths.get(directory),
                 1);) {
 
             list = stream.filter(Files::isRegularFile).collect(Collectors.toList());
