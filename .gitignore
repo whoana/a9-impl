@@ -1,14 +1,3 @@
 /.DS_Store
 /target
-home/interfaces/a.b/data1
-home/interfaces/a.b/data2
-home/interfaces/a.b/data3
-home/interfaces/a.b/data4
-home/interfaces/a.b/data5
-home/interfaces/a.b/data6
-home/interfaces/a.b/data7
-home/interfaces/a.b/data8
-home/interfaces/a.b/data9
-home/interfaces/a.b/data10
-home/interfaces/a.b/error/err1
-home/interfaces/b.a/data1
+home/interfaces

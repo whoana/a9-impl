@@ -1,6 +1,5 @@
 package apple.mint.agent.impl.service.push;
 
-
 import java.io.IOException;
 
 import java.nio.file.Files;
@@ -23,7 +22,7 @@ import org.springframework.core.ParameterizedTypeReference;
 
 import apple.mint.agent.core.channel.SendChannelWrapper;
 import apple.mint.agent.core.service.PushService;
-import apple.mint.agent.core.service.ServiceContext;  
+import apple.mint.agent.core.service.ServiceContext;
 import pep.per.mint.common.data.basic.ComMessage;
 import pep.per.mint.common.data.basic.Extension;
 import pep.per.mint.common.data.basic.agent.IIPAgentInfo;
@@ -31,10 +30,16 @@ import pep.per.mint.common.util.Util;
 
 /**
  * <pre>
- *  고용노동부(MOEL) 파일인터페이스 모니터링 서비스 
+ *  고용노동부(MOEL) 파일인터페이스 모니터링 서비스
  *  
- *  
+ *  checkFileCd 
+ *      0 : OK
+ *      0 보다 큰값 : 파일 체크 에러 
+ *  checkErrorFileCd 
+ *      0 : OK
+ *      0 보다 큰값 : 파일 체크 에러 
  * </pre>
+ * 
  * @since 2023.01
  * @author whoana
  * 
@@ -58,9 +63,10 @@ public class WS0049Service extends PushService {
 
             interfaceList = new ArrayList<Map<String, String>>();
 
-            String url = (String) params.get("init.service.url");
-            if (url == null)
+            if (params == null || !params.containsKey("init.service.url")) {
                 throw new IllegalArgumentException("WS0049Service must to have parameter value for init.service.url");
+            }
+            String url = (String) params.get("init.service.url");
 
             ComMessage<Map<String, String>, List<Map<String, String>>> comMessage = new ComMessage<Map<String, String>, List<Map<String, String>>>();
             comMessage.setAppId("agent.WS0049Service");
@@ -71,12 +77,12 @@ public class WS0049Service extends PushService {
             requestObj.put("agentId", serviceContext.getAgentInfo().getAgentId());
             comMessage.setRequestObject(requestObj);
 
-            ComMessage<Map<String, String>, List<Map<String, String>>> response 
-                = restServiceClient.<ComMessage<Map<String, String>, List<Map<String, String>>>>call2(
-                    url,
-                    comMessage,
-                    new ParameterizedTypeReference<ComMessage<Map<String, String>, List<Map<String, String>>>>() {
-                    });
+            ComMessage<Map<String, String>, List<Map<String, String>>> response = restServiceClient
+                    .<ComMessage<Map<String, String>, List<Map<String, String>>>>call2(
+                            url,
+                            comMessage,
+                            new ParameterizedTypeReference<ComMessage<Map<String, String>, List<Map<String, String>>>>() {
+                            });
 
             if (!Util.isEmpty(response)) {
                 interfaceList = response.getResponseObject();
@@ -99,12 +105,13 @@ public class WS0049Service extends PushService {
         IIPAgentInfo agentInfo = serviceContext.getAgentInfo();
         List<Map<String, Object>> logs = new ArrayList<Map<String, Object>>();
         for (Map<String, String> fileInterface : interfaceList) {
-            checkInterface(fileInterface, agentInfo.getAgentId(), logs);
+            Map<String, Object> log = checkInterface(fileInterface, agentInfo.getAgentId());
+            if (log != null)
+                logs.add(log);
         }
 
         if (Util.isEmpty(logs))
             return null;
-
 
         ComMessage<List<Map<String, Object>>, ?> msg = new ComMessage<>();
         msg.setId(UUID.randomUUID().toString());
@@ -116,115 +123,117 @@ public class WS0049Service extends PushService {
         ext.setServiceCd("WS0049");
         msg.setExtension(ext);
 
-
         logger.debug(Util.join("msg:", Util.toJSONPrettyString(msg)));
 
         return msg;
     }
 
     final static String DIRECTION_SEND = "S";
-    
-    private void checkInterface(Map<String, String> interfaze, String agentId, List<Map<String, Object>> logs) throws IOException {
+
+    Map<String, Object> checkInterface(Map<String, String> interfaze, String agentId) throws IOException {
         String directory = interfaze.get("directory");
-        String direction = interfaze.get("direction");        
+        String direction = interfaze.get("direction");
         String errorDirectory = interfaze.get("errorDirectory");
         int errorFileDurationLimit = Integer.parseInt(interfaze.get("errorFileDurLimit"));
         int fileTimeLimit = Integer.parseInt(interfaze.get("fileTimeLimit"));
         String interfaceId = interfaze.get("interfaceId");
-         
 
-        
-        
-        
-        
-        
-        
-        Map<String, Object> log = new LinkedHashMap<>();         
-        
-        log.put("interfaceId", interfaceId);           // 인터페이스ID (PK)
-        log.put("checkTime", Util.getFormatedDate());  // 체크시작시간(초)
-        log.put("fileCount", 0);                // 시간미초과파일건수
-        log.put("lazyFileCount" , 0);           // 시간초과파일건수
-        log.put("errorFileCount" , 0);          // 에러파일건수
-        log.put("regAgentId", agentId);                // 등록AGENT
+        Map<String, Object> log = new LinkedHashMap<>();
+
+        log.put("interfaceId", interfaceId); // 인터페이스ID (PK)
+        log.put("checkTime", Util.getFormatedDate()); // 체크시작시간(초)
+        log.put("checkFileCd", "0"); // 체크에러코드
+        log.put("checkFileMsg", "OK"); // 체크에러코드
+        log.put("checkErrorFileCd", "0"); // 체크에러코드
+        log.put("checkErrorFileMsg", "OK"); // 체크에러코드
+        log.put("fileCount", 0); // 시간미초과파일건수
+        log.put("lazyFileCount", 0); // 시간초과파일건수
+        log.put("errorFileCount", 0); // 에러파일건수
+        log.put("regAgentId", agentId); // 등록AGENT
         log.put("regDate", Util.getFormatedDate(Util.DEFAULT_DATE_FORMAT_MI));// 등록일시
-     
-        try (Stream<Path> stream = Files.walk(Paths.get(directory), 1);) {
-            
-            List<Path> list = Collections.emptyList();
-            list = stream.filter(Files::isRegularFile).collect(Collectors.toList());
-            
-            int fileCount = 0;
-            int delayedFileCount = 0;
-            for (Path file : list) {
-                FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
-                int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
-                if (elapsedMin > fileTimeLimit) {
-                    delayedFileCount++;
-                } else {
-                    fileCount++;
-                }
-            }
-            log.put("lazyFileCount" , delayedFileCount);             
-            log.put("fileCount", fileCount);
-            
-        }catch (IOException e) {
-            logger.error("", e);
-        }
- 
-        // 송신이면 에러 폴더도 추가 확인
-        if (DIRECTION_SEND.equals(direction)) {
-            try (Stream<Path> stream = Files.walk(Paths.get(errorDirectory), 1);) {            
+
+        if (Files.exists(Paths.get(directory))) {
+            try (Stream<Path> stream = Files.walk(Paths.get(directory), 1);) {
+
                 List<Path> list = Collections.emptyList();
                 list = stream.filter(Files::isRegularFile).collect(Collectors.toList());
-                
-                int errorFileCount = 0;
+
+                int fileCount = 0;
+                int delayedFileCount = 0;
                 for (Path file : list) {
                     FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
-                    int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60); 
-                    if (elapsedMin < errorFileDurationLimit) { // 에러파일의 보관주기 시간단위가 초가 아닐 경우 소스 수정 필요 .
-                        errorFileCount ++;
-                    }  
-                }                
-                log.put("errorFileCount", errorFileCount);                
-            }catch (IOException e) {
-                logger.error("", e);
-            }
-        }  
+                    int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
+                    if (elapsedMin > fileTimeLimit) {
+                        delayedFileCount++;
+                    } else {
+                        fileCount++;
+                    }
+                }
+                log.put("lazyFileCount", delayedFileCount);
+                log.put("fileCount", fileCount);
 
-        logs.add(log);
+            } catch (IOException e) {
+                logger.error(interfaceId.concat(" check error:"), e);
+                String errorMsg = e.getMessage();
+                log.put("checkFileCd", "9");// 체크에러코드
+                log.put("checkFileMsg", errorMsg);// 체크에러메시지
+            }
+        } else {
+            log.put("checkFileCd", "9");// 체크에러코드
+            log.put("checkFileMsg", "체크할 인터페이스폴더를 찾을 수 없습니다.");// 체크에러메시지
+        }
+
+        // 송신이면 에러 폴더도 추가 확인
+        if (DIRECTION_SEND.equals(direction)) {
+
+            if (Files.exists(Paths.get(errorDirectory))) {
+                try (Stream<Path> stream = Files.walk(Paths.get(errorDirectory), 1);) {
+                    List<Path> list = Collections.emptyList();
+                    list = stream.filter(Files::isRegularFile).collect(Collectors.toList());
+
+                    int errorFileCount = 0;
+                    for (Path file : list) {
+                        FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
+                        int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
+                        if (elapsedMin < errorFileDurationLimit) { // 에러파일의 보관주기 시간단위가 초가 아닐 경우 소스 수정 필요 .
+                            errorFileCount++;
+                        }
+                    }
+                    log.put("errorFileCount", errorFileCount);
+                } catch (IOException e) {
+                    logger.error(interfaceId.concat(" check error:"), e);
+                    String errorMsg = e.getMessage();
+                    log.put("checkErrorFileCd", "9");// 체크에러코드
+                    log.put("checkErrorFileMsg", errorMsg);// 체크에러메시지
+                }
+            } else {
+                log.put("checkErrorFileCd", "9");// 체크에러코드
+                log.put("checkErrorFileMsg", "체크할 에러폴더를 찾을 수 없습니다.");// 체크에러메시지
+            }
+        }
+
+        return log;
 
     }
 
     // 참고 리소스
     // https://velog.io/@dailylifecoding/Java-nio-package-Files-usage
-    public static void main(String[] args) throws InterruptedException {
-        Thread.sleep(1000);
-        String directory = "/Users/whoana/DEV/workspace-vs/a9-impl/home/interfaces/a.b2";
-        long elapsed = System.currentTimeMillis();
-        List<Path> list = Collections.emptyList();
-        try (Stream<Path> stream = Files.walk(Paths.get(directory),
-                1);) {
-
-            list = stream.filter(Files::isRegularFile).collect(Collectors.toList());
-
-            list.forEach((item) -> {
-                try {
-                    FileTime creationTime = (FileTime) Files.getAttribute(item, "creationTime");
-                    System.out.println(
-                            item.toFile().getName() + " : " + ((elapsed - creationTime.toMillis()) / 1000 / 60 / 60 / 24));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            System.out.println("elapsed:" + (System.currentTimeMillis() - elapsed));
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+    public static void main(String[] args) throws Exception {
+ 
+        try{
+            ServiceContext serviceContext = new ServiceContext();
+            IIPAgentInfo agentInfo = new IIPAgentInfo();
+            agentInfo.setAgentCd("AGENT001");
+            agentInfo.setAgentId("AG00000001");
+            serviceContext.setAgentInfo(agentInfo);
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("init.service.url", "http://127.0.0.1:8080/mint/op/agents/services/v4/moel/init?method=GET");
+            WS0049Service service = new WS0049Service("WS0049", "interface file check", serviceContext, null, params, null);
+            ComMessage<?, ?> comMessage = service.makePushMessage();
+            System.out.println(Util.toJSONPrettyString(comMessage));
+        }catch(Exception e){
             e.printStackTrace();
         }
     }
-}
 
- 
+}
