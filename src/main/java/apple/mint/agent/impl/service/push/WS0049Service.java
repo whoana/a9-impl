@@ -31,13 +31,17 @@ import pep.per.mint.common.util.Util;
 /**
  * <pre>
  *  고용노동부(MOEL) 파일인터페이스 모니터링 서비스
- *  
+ * 
+ *  에러코드 처리는 일단 보류  
  *  checkFileCd 
  *      0 : OK
- *      0 보다 큰값 : 파일 체크 에러 
- *  checkErrorFileCd 
+ *      1 : 전송지연 
+ *      9 : 파일체크 예외 발생 
+ * 
+ *  checkErrorFileCd
  *      0 : OK
- *      0 보다 큰값 : 파일 체크 에러 
+ *      2 : 에러  
+ *      9 : 에러파일체크 예외 발생
  * </pre>
  * 
  * @since 2023.01
@@ -135,17 +139,23 @@ public class WS0049Service extends PushService {
         String direction = interfaze.get("direction");
         String errorDirectory = interfaze.get("errorDirectory");
         int errorFileDurationLimit = Integer.parseInt(interfaze.get("errorFileDurLimit"));
+        int maxFileCountLimit = Integer.parseInt(interfaze.get("maxFileCountLimit"));
         int fileTimeLimit = Integer.parseInt(interfaze.get("fileTimeLimit"));
         String interfaceId = interfaze.get("interfaceId");
 
         Map<String, Object> log = new LinkedHashMap<>();
 
+        String checkFileCd = "0";
+        String checkFileMsg = "OK";
+        String checkErrorFileCd = "0";
+        String checkErrorFileMsg = "OK";
+
         log.put("interfaceId", interfaceId); // 인터페이스ID (PK)
         log.put("checkTime", Util.getFormatedDate()); // 체크시작시간(초)
-        log.put("checkFileCd", "0"); // 체크에러코드
-        log.put("checkFileMsg", "OK"); // 체크에러코드
-        log.put("checkErrorFileCd", "0"); // 체크에러코드
-        log.put("checkErrorFileMsg", "OK"); // 체크에러코드
+        log.put("checkFileCd", checkFileCd); // 체크에러코드
+        log.put("checkFileMsg", checkFileMsg); // 체크에러코드
+        log.put("checkErrorFileCd", checkErrorFileCd); // 체크에러코드
+        log.put("checkErrorFileMsg", checkErrorFileMsg); // 체크에러코드
         log.put("fileCount", 0); // 시간미초과파일건수
         log.put("lazyFileCount", 0); // 시간초과파일건수
         log.put("errorFileCount", 0); // 에러파일건수
@@ -172,16 +182,24 @@ public class WS0049Service extends PushService {
                 log.put("lazyFileCount", delayedFileCount);
                 log.put("fileCount", fileCount);
 
+                if (delayedFileCount >= maxFileCountLimit) {
+                    checkFileCd = "1";
+                    checkFileMsg = "전송지연";
+                }
+
             } catch (IOException e) {
                 logger.error(interfaceId.concat(" check error:"), e);
                 String errorMsg = e.getMessage();
-                log.put("checkFileCd", "9");// 체크에러코드
-                log.put("checkFileMsg", errorMsg);// 체크에러메시지
+                checkFileCd = "9";
+                checkFileMsg = errorMsg;
             }
         } else {
-            log.put("checkFileCd", "9");// 체크에러코드
-            log.put("checkFileMsg", "체크할 인터페이스폴더를 찾을 수 없습니다.");// 체크에러메시지
+            checkFileCd = "9";
+            checkFileMsg = "체크할 인터페이스폴더를 찾을 수 없습니다.";
         }
+
+        log.put("checkFileCd", checkFileCd);// 체크에러코드
+        log.put("checkFileMsg", checkFileMsg);// 체크에러메시지
 
         // 송신이면 에러 폴더도 추가 확인
         if (DIRECTION_SEND.equals(direction)) {
@@ -200,16 +218,25 @@ public class WS0049Service extends PushService {
                         }
                     }
                     log.put("errorFileCount", errorFileCount);
+
+                    if (errorFileCount > 0) {
+                        checkErrorFileCd = "2";
+                        checkErrorFileMsg = "전송에러";
+                    }
+
                 } catch (IOException e) {
                     logger.error(interfaceId.concat(" check error:"), e);
                     String errorMsg = e.getMessage();
-                    log.put("checkErrorFileCd", "9");// 체크에러코드
-                    log.put("checkErrorFileMsg", errorMsg);// 체크에러메시지
+                    checkErrorFileCd = "9";
+                    checkErrorFileMsg = errorMsg;
                 }
             } else {
-                log.put("checkErrorFileCd", "9");// 체크에러코드
-                log.put("checkErrorFileMsg", "체크할 에러폴더를 찾을 수 없습니다.");// 체크에러메시지
+                checkErrorFileCd = "9";
+                checkErrorFileMsg = "체크할 에러폴더를 찾을 수 없습니다.";
             }
+
+            log.put("checkErrorFileCd", checkErrorFileCd);// 체크에러코드
+            log.put("checkErrorFileMsg", checkErrorFileMsg);// 체크에러메시지
         }
 
         return log;
@@ -219,8 +246,8 @@ public class WS0049Service extends PushService {
     // 참고 리소스
     // https://velog.io/@dailylifecoding/Java-nio-package-Files-usage
     public static void main(String[] args) throws Exception {
- 
-        try{
+
+        try {
             ServiceContext serviceContext = new ServiceContext();
             IIPAgentInfo agentInfo = new IIPAgentInfo();
             agentInfo.setAgentCd("AGENT001");
@@ -228,10 +255,11 @@ public class WS0049Service extends PushService {
             serviceContext.setAgentInfo(agentInfo);
             Map<String, String> params = new HashMap<String, String>();
             params.put("init.service.url", "http://127.0.0.1:8080/mint/op/agents/services/v4/moel/init?method=GET");
-            WS0049Service service = new WS0049Service("WS0049", "interface file check", serviceContext, null, params, null);
+            WS0049Service service = new WS0049Service("WS0049", "interface file check", serviceContext, null, params,
+                    null);
             ComMessage<?, ?> comMessage = service.makePushMessage();
             System.out.println(Util.toJSONPrettyString(comMessage));
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
