@@ -58,8 +58,6 @@ public class WS0049Service extends PushService {
             String cd, String name, ServiceContext serviceContext, SendChannelWrapper sendQueueWrapper, Map params,
             Boolean disabled) {
         super(cd, name, serviceContext, sendQueueWrapper, params, disabled);
-
-        initialize();
     }
 
     private void initialize() {
@@ -71,6 +69,10 @@ public class WS0049Service extends PushService {
                 throw new IllegalArgumentException("WS0049Service must to have parameter value for init.service.url");
             }
             String url = (String) params.get("init.service.url");
+            String address = serviceContext.getServerAddress();
+            String port = serviceContext.getServerPort();
+            port = Util.isEmpty(port) ? "80" : port;
+            url = "http://" + address + ":" + port + url;
 
             ComMessage<Map<String, String>, List<Map<String, String>>> comMessage = new ComMessage<Map<String, String>, List<Map<String, String>>>();
             comMessage.setAppId("agent.WS0049Service");

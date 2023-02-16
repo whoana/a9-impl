@@ -184,9 +184,7 @@ public class SystemResourceUtil {
 
 			ProcessQueryString query = new ProcessQueryString(process.getProcessNm(),
 					process.getCheckValue());
-					
-			logger.info(Util.toJSONPrettyString(query));
-
+		
 			List<Long> pids = pm.findPidList(query);
 			//
 			ProcessStatusLog log = new ProcessStatusLog();
