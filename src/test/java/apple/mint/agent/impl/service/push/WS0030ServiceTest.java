@@ -24,8 +24,8 @@ public class WS0030ServiceTest {
         
         ProcessInfo processInfo = new ProcessInfo();         
         processInfo.setCheckCount(1); // 필수값 
-        processInfo.setCheckValue("catalina"); // 필수값 
-        processInfo.setProcessNm("java");  //필수값 
+        processInfo.setCheckValue("check value1"); // 필수값 
+        processInfo.setProcessNm("command1");  //필수값 
         //pi.setProcessId("java");// processId는 필수값 아님 
 
         List<ProcessInfo> processes = new ArrayList<ProcessInfo>();

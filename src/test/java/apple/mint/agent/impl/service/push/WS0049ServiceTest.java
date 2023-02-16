@@ -17,8 +17,11 @@ public class WS0049ServiceTest {
             agentInfo.setAgentCd("AGENT01");
             agentInfo.setAgentId("AG00000001");
             serviceContext.setAgentInfo(agentInfo);
+            serviceContext.setServerAddress("localhost");
+            serviceContext.setServerPort("8080");
+
             Map<String, String> params = new HashMap<String, String>();
-            params.put("init.service.url", "http://127.0.0.1:8080/mint/op/agents/services/v4/moel/init?method=GET");
+            params.put("init.service.url", "/mint/op/agents/services/v4/moel/init?method=GET");
             WS0049Service service = new WS0049Service("WS0049", "interface file check", serviceContext, null, params, null);
             ComMessage<?, ?> comMessage = service.makePushMessage();
             System.out.println(Util.toJSONPrettyString(comMessage));

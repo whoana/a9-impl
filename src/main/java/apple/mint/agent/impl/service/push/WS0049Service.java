@@ -153,6 +153,7 @@ public class WS0049Service extends PushService {
         String checkErrorFileMsg = "OK";
 
         log.put("interfaceId", interfaceId); // 인터페이스ID (PK)
+        log.put("agentId", agentId); // 등록AGENT
         log.put("checkTime", Util.getFormatedDate()); // 체크시작시간(초)
         log.put("checkFileCd", checkFileCd); // 체크에러코드
         log.put("checkFileMsg", checkFileMsg); // 체크에러코드
@@ -161,7 +162,6 @@ public class WS0049Service extends PushService {
         log.put("fileCount", 0); // 시간미초과파일건수
         log.put("lazyFileCount", 0); // 시간초과파일건수
         log.put("errorFileCount", 0); // 에러파일건수
-        log.put("regAgentId", agentId); // 등록AGENT
         log.put("regDate", Util.getFormatedDate(Util.DEFAULT_DATE_FORMAT_MI));// 등록일시
 
         if (Files.exists(Paths.get(directory))) {
