@@ -68,6 +68,11 @@ public class WS0049Service extends PushService {
             if (params == null || !params.containsKey("init.service.url")) {
                 throw new IllegalArgumentException("WS0049Service must to have parameter value for init.service.url");
             }
+
+            if(serviceContext == null || serviceContext.getAgentInfo() == null){
+                throw new IllegalArgumentException("WS0049Service's serviceContext.getAgentInfo may be null.");
+            }
+
             String url = (String) params.get("init.service.url");
             String address = serviceContext.getServerAddress();
             String port = serviceContext.getServerPort();
@@ -78,7 +83,7 @@ public class WS0049Service extends PushService {
             comMessage.setAppId("agent.WS0049Service");
             comMessage.setCheckSession(false);
             comMessage.setStartTime(Util.getFormatedDate(Util.DEFAULT_DATE_FORMAT_MI));
-            comMessage.setUserId(serviceContext.getAgentInfo().getAgentCd());
+            comMessage.setUserId(serviceContext.getAgentInfo().getAgentNm());
             Map<String, String> requestObj = new HashMap<String, String>();
             requestObj.put("agentId", serviceContext.getAgentInfo().getAgentId());
             comMessage.setRequestObject(requestObj);
