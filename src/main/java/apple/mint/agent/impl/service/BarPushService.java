@@ -43,4 +43,9 @@ public class BarPushService extends PushService {
         return msg;
     }
 
+    @Override
+    public void reset(){
+        logger.info(this.getClass().getSimpleName() + " was resetted.");
+    }
+
 }

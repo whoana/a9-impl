@@ -271,4 +271,12 @@ public class WS0049Service extends PushService {
         }
     }
 
+    @Override
+    public void reset(){
+
+        initialize();
+        logger.info(this.getClass().getSimpleName() + " was resetted.");
+
+    }
+
 }

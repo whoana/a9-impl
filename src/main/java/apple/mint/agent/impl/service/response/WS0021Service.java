@@ -26,5 +26,10 @@ public class WS0021Service extends ResponseService{
         serviceContext.getRestartAgentService().restart();
         return null;
     }
+
+    @Override
+    public void reset(){
+        logger.info(this.getClass().getSimpleName() + " was resetted.");
+    }
     
 }
