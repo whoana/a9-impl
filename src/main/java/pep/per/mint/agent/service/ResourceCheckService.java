@@ -37,6 +37,16 @@ public class ResourceCheckService {
 	// SystemResourceUtil systemResourceUtil;
 	SystemResourceUtilBy3Party systemResourceUtil;
 
+	/**
+	 * <pre>
+	 * 	CPU, DISK, MEM 상태 로그 체크 
+	 *  20230401 현재 미사용.
+	 * </pre>
+	 * @deprecated
+	 * @param resources
+	 * @return
+	 * @throws Throwable
+	 */
 	public List<ResourceUsageLog> getResourceUsageLog(List<ResourceInfo> resources) throws Throwable {
 
 		logger.debug(Util.join("resources:", Util.toJSONString(resources)));
@@ -92,6 +102,16 @@ public class ResourceCheckService {
 		return logs;
 	}
 
+	/**
+	 * <pre>
+	 * 	리소스 타입 별 로그 수집 
+	 * 	AgentController 에서 CPU, Memory, Disk 유형별로 호출  
+	 * </pre>
+	 * @param resourceType
+	 * @param resources
+	 * @return
+	 * @throws Throwable
+	 */
 	public List<ResourceUsageLog> getResourceUsageLog(String resourceType, List<ResourceInfo> resources)
 			throws Throwable {
 
