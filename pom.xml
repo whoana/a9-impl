@@ -44,17 +44,19 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- <dependency>
+		<dependency>
 			<groupId>org.jprocesses</groupId>
 			<artifactId>jProcessesCus</artifactId>
 			<version>1.0.0</version>
-		</dependency> -->
-
+		</dependency>
+		
+		<!--
 		<dependency>
 			<groupId>org.jprocesses</groupId>
 			<artifactId>jProcesses</artifactId>
 			<version>1.6.4</version>
 		</dependency>
+		-->
 
 		<!-- <dependency>
 			<groupId>com.profesorfalken</groupId>
@@ -164,13 +166,15 @@
 			<version>3.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-
+		
+		<!-- 
 		<dependency>
 			<groupId>pep.per</groupId>
 			<artifactId>mint-agent-common</artifactId>
 			<version>3.0.0</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> 
+		-->
 
 		<!--
 		//implementation group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3'

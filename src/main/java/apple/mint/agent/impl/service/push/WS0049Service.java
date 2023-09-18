@@ -109,16 +109,29 @@ public class WS0049Service extends PushService {
     @Override
     public ComMessage<?, ?> makePushMessage() throws Exception {
 
-        if (Util.isEmpty(interfaceList)) {
-            initialize();
-        }
+        //------------------------------------------------------------------------
+        //update date : 20230918 
+        //------------------------------------------------------------------------
+        //체크할 대상 인터페이스 리스트를 매번 조회하도록 변경
+        //서비스 재시작시 조회하게 되어 있지만, 별도의 동작을 하지 않고 체크 시점에 조회하도록 변경 요구  
+        // before updating
+        // if (Util.isEmpty(interfaceList)) {
+        //     initialize();
+        // }
+        // after updating
+        initialize();
 
         IIPAgentInfo agentInfo = serviceContext.getAgentInfo();
         List<Map<String, Object>> logs = new ArrayList<Map<String, Object>>();
         for (Map<String, String> fileInterface : interfaceList) {
+            
+            logger.debug(">> check interface dir : " + fileInterface.get("directory"));
             Map<String, Object> log = checkInterface(fileInterface, agentInfo.getAgentId());
-            if (log != null)
+
+            if (log != null) {
                 logs.add(log);
+            }
+
         }
 
         if (Util.isEmpty(logs))
@@ -160,14 +173,16 @@ public class WS0049Service extends PushService {
         log.put("interfaceId", interfaceId); // 인터페이스ID (PK)
         log.put("agentId", agentId); // 등록AGENT
         log.put("checkTime", Util.getFormatedDate()); // 체크시작시간(초)
-        log.put("checkFileCd", checkFileCd); // 체크에러코드
-        log.put("checkFileMsg", checkFileMsg); // 체크에러코드
-        log.put("checkErrorFileCd", checkErrorFileCd); // 체크에러코드
-        log.put("checkErrorFileMsg", checkErrorFileMsg); // 체크에러코드
+        log.put("checkFileCd", checkFileCd); // 체크파일코드
+        log.put("checkFileMsg", checkFileMsg); // 체크파일메시지
+        log.put("checkErrorFileCd", checkErrorFileCd); // 체크에러파일코드
+        log.put("checkErrorFileMsg", checkErrorFileMsg); // 체크에러파일메시지
         log.put("fileCount", 0); // 시간미초과파일건수
         log.put("lazyFileCount", 0); // 시간초과파일건수
         log.put("errorFileCount", 0); // 에러파일건수
         log.put("regDate", Util.getFormatedDate(Util.DEFAULT_DATE_FORMAT_MI));// 등록일시
+
+
 
         if (Files.exists(Paths.get(directory))) {
             try (Stream<Path> stream = Files.walk(Paths.get(directory), 1);) {
@@ -179,11 +194,19 @@ public class WS0049Service extends PushService {
                 int delayedFileCount = 0;
                 for (Path file : list) {
                     FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
+                    
                     int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
+
+                    logger.debug(">>> file name: " + file.getFileName());   
+                    logger.debug(">>> creation time: " + creationTime.toString());   
+                    logger.debug(">>> elased min: " + elapsedMin);                    
+
                     if (elapsedMin > fileTimeLimit) {
                         delayedFileCount++;
+                        logger.debug(">>> was delayed ");
                     } else {
                         fileCount++;
+                        logger.debug(">>> handled normally ");
                     }
                 }
                 log.put("lazyFileCount", delayedFileCount);
