@@ -109,27 +109,27 @@ public class WS0049Service extends PushService {
     @Override
     public ComMessage<?, ?> makePushMessage() throws Exception {
 
-        //------------------------------------------------------------------------
-        //update date : 20230918 
-        //------------------------------------------------------------------------
-        //체크할 대상 인터페이스 리스트를 매번 조회하도록 변경
-        //서비스 재시작시 조회하게 되어 있지만, 별도의 동작을 하지 않고 체크 시점에 조회하도록 변경 요구  
-        // before updating
-        // if (Util.isEmpty(interfaceList)) {
-        //     initialize();
-        // }
-        // after updating
-        initialize();
+
+        if (Util.isEmpty(interfaceList)) {
+            initialize();
+        }
+
 
         IIPAgentInfo agentInfo = serviceContext.getAgentInfo();
         List<Map<String, Object>> logs = new ArrayList<Map<String, Object>>();
         for (Map<String, String> fileInterface : interfaceList) {
             
-            logger.debug(">> check interface dir : " + fileInterface.get("directory"));
-            Map<String, Object> log = checkInterface(fileInterface, agentInfo.getAgentId());
 
-            if (log != null) {
-                logs.add(log);
+            try {
+                logger.debug("> start of check interface dir : " + fileInterface.get("directory"));
+
+                Map<String, Object> log = checkInterface(fileInterface, agentInfo.getAgentId());
+    
+                if (log != null) {
+                    logs.add(log);
+                }
+            }finally{
+                logger.debug("> end of check interface dir : " + fileInterface.get("directory"));
             }
 
         }
@@ -197,16 +197,16 @@ public class WS0049Service extends PushService {
                     
                     int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
 
-                    logger.debug(">>> file name: " + file.getFileName());   
-                    logger.debug(">>> creation time: " + creationTime.toString());   
-                    logger.debug(">>> elased min: " + elapsedMin);                    
+                    logger.debug(">> file name: " + file.getFileName());   
+                    logger.debug(">> creation time: " + creationTime.toString());   
+                    logger.debug(">> elased min: " + elapsedMin);                    
 
                     if (elapsedMin > fileTimeLimit) {
                         delayedFileCount++;
-                        logger.debug(">>> was delayed ");
+                        logger.debug(">> This is a delayed file.");
                     } else {
                         fileCount++;
-                        logger.debug(">>> handled normally ");
+                        logger.debug(">> This is a normal file.");
                     }
                 }
                 log.put("lazyFileCount", delayedFileCount);
@@ -243,8 +243,15 @@ public class WS0049Service extends PushService {
                     for (Path file : list) {
                         FileTime creationTime = (FileTime) Files.getAttribute(file, "creationTime");
                         int elapsedMin = Math.round((System.currentTimeMillis() - creationTime.toMillis()) / 1000 / 60);
+
+
+                        logger.debug(">> file name: " + file.getFileName());   
+                        logger.debug(">> creation time: " + creationTime.toString());   
+                        logger.debug(">> elased min: " + elapsedMin);  
+                        
                         if (elapsedMin < errorFileDurationLimit) { // 에러파일의 보관주기 시간단위가 초가 아닐 경우 소스 수정 필요 .
                             errorFileCount++;
+                            logger.debug(">> This is a error file.");
                         }
                     }
                     log.put("errorFileCount", errorFileCount);
